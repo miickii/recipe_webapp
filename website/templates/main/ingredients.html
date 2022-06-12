@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% from 'main/_render_field.html' import render_field %}
+
+{% block content %}
+<div class="container rounded mt-4 mb-2">
+    <div class="row justify-content-center">
+        <div class="col-md-4 d-flex justify-content-center ms-5">
+            <h1>Ingredients</h1>
+            <button type="button" class="btn btn-success ms-4 mt-1 align-self-start" data-bs-toggle="modal" data-bs-target="#add-ingredient">Add Ingredient</button>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-md-11 col-sm-10 p-0">
+            <div class="row border border-primary rounded pt-4 px-2">
+                {% for ingredient in ingredients %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="inline">{{ ingredient.name }}</h5>
+                    <a href="{{ url_for('views.delete_ingredient', id=ingredient.id)}}" class="btn inline btn-danger btn-sm ms-1 float-end" onclick="return confirm('Are You Sure To Delete?')">Delete</a>
+                    <a href="" class="btn inline btn-warning btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modaledit{{ ingredient.id }}">Edit</a>
+                </div>
+                 <!--Edit Modal -->
+                <div class="modal fade" id="modaledit{{ ingredient.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="POST">
+                                    {{ update_ingredient_form.csrf_token() }}
+                                    {{ update_ingredient_form.ingredient_id(value=ingredient.id)}}
+                                    {{ render_field(update_ingredient_form.name, class="form-control mb-2", value=ingredient.name)}}
+                                    {{ render_field(update_ingredient_form.ingredient_type, class="form-control mb-2", value=ingredient.ingredient_type)}}
+                                    {{ update_ingredient_form.submit_update_ingredient(class="btn btn-primary mt-3", value="Save") }}
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!--Add Modal -->
+<div class="modal fade" id="add-ingredient" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Ingredient</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST">
+                    {{ add_ingredient_form.csrf_token() }}
+                    {{ render_field(add_ingredient_form.name, class="form-control mb-2")}}
+                    {{ render_field(add_ingredient_form.ingredient_type, class="form-control mb-2")}}
+                    {{ add_ingredient_form.submit_add_ingredient(class="btn btn-primary mt-3", value="Add") }}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container rounded mt-4 mb-2">
+    <div class="row justify-content-center">
+        <div class="col-md-4 d-flex justify-content-center ms-5">
+            <h1>Categories</h1>
+            <button type="button" class="btn btn-success ms-4 mt-1 align-self-start" data-bs-toggle="modal" data-bs-target="#add-category">Add Category</button>
+        </div>
+    </div>
+</div>
+<div class="container mb-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-md-11 col-sm-10 p-0">
+            <div class="row border border-primary rounded pt-4 px-2">
+                {% for category in categories %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="inline">{{ category.name }}</h5>
+                        <a href="{{ url_for('views.delete_category', id=category.id)}}" class="btn btn-danger btn-sm ms-1 float-end" onclick="return confirm('Are You Sure To Delete?')">Delete</a>
+                        <a href="" class="btn btn-warning btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modaleditcategory{{ category.id }}">Edit</a>
+                </div>
+
+                <!--Edit Modal -->
+                <div class="modal fade" id="modaleditcategory{{ category.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Edit</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="" method="POST">
+                                    {{ update_cat_form.csrf_token() }}
+                                    {{ update_cat_form.category_id(value=category.id) }}
+                                    {{ render_field(update_cat_form.name, class="form-control mb-2", value=category.name)}}
+                                    {{ render_field(add_cat_form.color, type="color", class="form-control mb-2 form-control-color", value=category.color) }}
+                                    {{ update_cat_form.submit_update_category(class="btn btn-primary mt-3", value="Save") }}
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Add category -->
+<div class="modal fade" id="add-category" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="" method="POST">
+                    {{ add_cat_form.csrf_token() }}
+                    {{ render_field(add_cat_form.name, class="form-control mb-2") }}
+                    {{ render_field(add_cat_form.color, type="color", class="form-control mb-2 form-control-color", value="#FF2400") }}
+                    {{ add_cat_form.submit_add_category(class="btn btn-primary mt-3", value="Add") }}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

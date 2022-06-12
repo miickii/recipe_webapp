@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"name": "Recipe-app",
+			"path": "."
+		},
+		{
+			"name": "Probability:Statistics",
+			"path": "../../Random_projects/Probability:Statistics"
+		},
+		{
+			"name": "mega_flask",
+			"path": "../mega_flask"
+		},
+		{
+			"name": "test_imports",
+			"path": "../../Random_projects/test_imports"
+		},
+		{
+			"name": "microblog-0.15",
+			"path": "../microblog-0.15"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "KemiProgram"
+	}
+}

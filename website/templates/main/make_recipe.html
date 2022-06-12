@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row mt-4 text-center">
+        <h1 class="fw-normal display-4"><strong>{{ recipe.name }}</strong></h1>
+    </div>
+    <div class="row text-center justify-content-center">
+        <div class="col-md-8">
+            <h4 class="fw-normal">{{ recipe.description }}</h4>
+        </div>
+    </div>
+</div>
+<div class="container-fluid mt-1 mb-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-7 col-md-9 col-sm-10">
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-8">
+                    <img src="{{ recipe.img }}" class="img-fluid rounded-img">
+                </div>
+            </div>
+            <div class="row text-center mt-3">
+                <div class="col-md-3">
+                    <div class="border border-dark pt-3">
+                        <i class="fas fa-solid fa-utensils fa-lg"></i>
+                        <h4 class="mt-1 counter">{{ recipe.servings }}</h4>
+                        <p>Servings</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border border-dark pt-3">
+                        <i class="fas fa-solid fa-clock fa-lg"></i>
+                        <h4 class="mt-1 counter">{{ recipe.prep_time }}</h4>
+                        <p>Prep Time</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border border-dark pt-3">
+                        <i class="fas fa-solid fa-clock fa-lg"></i>
+                        <h4 class="mt-1 counter">{{ recipe.cook_time }}</h4>
+                        <p>Cook Time</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="border border-dark pt-3">
+                        <i class="fas fa-solid fa-hourglass-end fa-lg"></i>
+                        <h4 class="mt-1 counter">{{ recipe.total_time }}</h4>
+                        <p>Total Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+        <div class="col-sm-10 border-top border-3 border-secondary">
+        </div>
+    </div>
+    <div class="row mt-2">
+        <div class="col-md-6 mb-5">
+            <div class="row">
+                <div class="col-sm-4 offset-sm-3 col-md-4 offset-md-4 d-flex">
+                    <h3 class="align-self-end m-0"><strong>Ingredients</strong></h3>
+                </div>
+                <div class="col-sm-3 col-md-3 col-xl-2 offset-md-1 p-0 border">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="decrease-servings"><i class="fa fa-minus"></i></button>
+                        </div>
+                        <input type="text" class="form-control form-control-sm text-center" id="servings-size" aria-label="Example text with button addon" aria-describedby="button-addon1" value="{{ recipe.servings }}">
+                        <div class="input-group-append">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" id="increase-servings"><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                {% for ingredient in recipe.ingredients %}
+                <div class="col-sm-12 offset-md-4 offset-sm-3">
+                    <div class="input-group">
+                        <div class="input-group-text bg-transparent border-0">
+                            <input class="form-check-input checkbox-input mt-0" type="checkbox" name="ingredient-checkbox" value="" id="{{ ingredient.name }}-{{ loop.index0 }}">
+                        </div>
+                        <div class="input-group-label d-flex align-items-center">
+                            <label class="col-form-label checkbox-label" for="{{ ingredient.name }}" id="label-{{ ingredient.name }}">
+                                {{ ingredient.name }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- Force next columns to break to new line -->
+                <div class="w-100"></div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-sm-3 offset-sm-3 offset-md-1">
+                    <h3 class="align-self-end m-0"><strong>Tips</strong></h3>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-sm-10 offset-sm-2 col-md-8 offset-md-1">
+                        <p class="h5 fw-normal mb-5">{{ recipe.notes }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>       
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-9 offset-sm-1 border-top border-3 make-recipe-border align-self-center">
+        </div>
+        <div class="col-sm-1"><i class="fas fa-solid fa-flask fa-2x make-recipe-icon"></i></div>
+    </div>
+    <div class="row my-2">
+        <div class="col-sm-3 offset-sm-2 offset-md-3">
+            <h3 class="align-self-end m-0"><strong>Directions</strong></h3>
+        </div>
+    </div>
+    <div class="row mt-4">
+        {% for step in steps %}
+        <div class="col-sm-6 offset-sm-2 offset-md-3">
+            <h6 class="mb-4"><i class="fas fa-solid fa-clipboard-check fa-lg me-2"></i><strong>Step {{ loop.index }}</strong></h6>
+            <p class="h5 fw-normal mb-5">{{ step }}</p>
+        </div>
+        <!-- Force next columns to break to new line -->
+        <div class="w-100"></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        const counterUp = window.counterUp.default
+        let ingredient_checkboxes = $("input[name='ingredient-checkbox']");
+        let ingredient_amounts = [{{ amounts|safe }}][0];
+        let starting_amounts = [];
+        let curr_amounts = []; // Keeps track of the amount of each ingredient as it gets changed by servings size
+        let amounts_rest = [];
+        for (let amount of ingredient_amounts) {
+            let i = amount.indexOf(' ');
+            if (i > 0) {
+                // Not a space at the start of the string
+                starting_amounts.push(parseInt(amount.substring(0, i)));
+                curr_amounts.push(parseInt(amount.substring(0, i)));
+                amounts_rest.push(amount.substring(i + 1));
+            } else {
+                // check if its just a number
+                if (!isNaN(amount)) {
+                    starting_amounts.push(parseInt(amount));
+                    curr_amounts.push(parseInt(amount));
+                    amounts_rest.push('');
+                } else {
+                    starting_amounts.push(0);
+                    curr_amounts.push(0);
+                    amounts_rest.push('');
+                }
+            }
+        }
+        console.log(ingredient_checkboxes);
+
+        var elements = document.querySelectorAll('.counter');
+        for(var i = 0; i < elements.length; i++){
+            var el = elements[i];
+            // Start counting, typically you need to call this when the 
+            // element becomes visible, or whenever you like.
+            counterUp( el, {
+                duration: 1000,
+                delay: 16,
+            } )
+        }
+
+        ingredient_checkboxes.change(function() {
+            let name = $(this).attr('id').split('-')[0];
+            let index = $(this).attr('id').split('-')[1];
+            let amount = curr_amounts[index];
+            let rest = amounts_rest[index];
+            let label = $("label[for='" + name + "']");
+            let label_txt = amount + " " + rest + " " + name;
+            if ($(this).is(':checked')) {
+                label.html("<s>" + label_txt + "</s>");
+            } else {
+                label.html(label_txt);
+            }
+         });
+         ingredient_checkboxes.trigger('change');
+
+         let servings_input = $('#servings-size');
+         let servings = parseInt(servings_input.val());
+         let default_servings = servings;
+
+         function update_ingredient_amounts() {
+            let ratio = servings / default_servings;
+            for (let i = 0; i < starting_amounts.length; i++) {
+                let new_amount = starting_amounts[i] * ratio;
+                if (new_amount % 1 == 0 || new_amount > 9) {
+                    // If its a whole number or the number is big
+                    new_amount = Math.floor(new_amount);
+                } else {
+                    new_amount = new_amount.toFixed(1);
+                }
+                curr_amounts[i] = new_amount;
+            }
+            ingredient_checkboxes.trigger('change');
+         }
+         $('#decrease-servings').click(function() {
+            servings--;
+            if (servings < 1) {
+                servings = 1;
+            }
+            servings_input.val(servings);
+
+            // Change each amount of ingredient
+            update_ingredient_amounts();
+         });
+         $('#increase-servings').click(function() {
+            servings++;
+            servings_input.val(servings);
+
+            // Change each amount of ingredient
+            update_ingredient_amounts();
+         });
+         $('#servings-size').change(function() {
+            servings = $(this).val();
+            update_ingredient_amounts();
+         });
+    });
+</script>
+{% endblock %}

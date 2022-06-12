@@ -1,0 +1,25 @@
+<!--The macro is a function of jinjja to avoid repeated code-->
+<!--In this case it is used to simplify the code for the forms in the html where the forms are implemented-->
+{% macro render_field(field) %}
+{{ field.label }}
+<!--kwargs allows us to include arguments, we will be using class=""-->
+<!--pipe safe will exclude this field from automatic escaping-->
+{{ field(**kwargs)|safe }}
+{% endmacro %}
+
+{% macro render_field_recipe(field, space, class="form-control", label_text=field.label.text) %}
+<!--class="form-group" isn't needed anymore in bootstrap 5-->
+<div class="col-md-{{ space }} my-2">
+    {% if field.type != "SubmitField" %}
+    <label for="{{ field.name }}" class="">{{ label_text }}</label>
+    {% endif %}
+    <!--**kwargs just means any additional arguments-->
+    {{ field(class_=class, **kwargs)|safe }}
+    <ul>
+    {% for error in field.errors %}
+    <li style="color: red;">{{ error }}</li>
+    {% endfor %}
+    </ul>
+    <!--<input type="text" required name="name" id="name" class="form-control">-->
+</div>
+{% endmacro %}

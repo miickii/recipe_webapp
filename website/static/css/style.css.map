@@ -1,0 +1,12 @@
+{
+    "version": 3,
+    "mappings": "",
+    "sources": [
+        "../style.scss",
+        "../bootstrap-5.0.2/scss/_functions.scss",
+        "../bootstrap-5.0.2/scss/_variables.scss",
+        "../bootstrap-5.0.2/scss/_utilities.scss"
+    ],
+    "names": [],
+    "file": "style.css"
+}

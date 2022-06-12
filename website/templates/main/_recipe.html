@@ -1,0 +1,15 @@
+<img src="{{ recipe.img }}" class="img-fluid">
+<div class="card px-1">
+    <div class="card-body">
+        <h5 class="card-title text-center">{{ recipe.name }}</h5>
+        {% for category in recipe.categories %}
+        <span class="badge rounded-pill bg-red px-2">{{ category.name }}</span>
+        {% endfor %}
+        <p class="card-text mt-2">{{ recipe.description }}</p>
+        <h6 class="text-center text-muted">Cook Time: {{ recipe.total_time }}</h6>
+        <div class="d-flex justify-content-between install mt-3">
+            <div><i class="fa fa-calendar-o"></i><span class="ms-2">1 days ago</span></div>
+            <a href="#" class="text-decoration-none"><span class="text-primary">Go To Recipe&nbsp;<i class="fa fa-angle-right"></i></span></a>
+        </div>
+    </div>
+</div>

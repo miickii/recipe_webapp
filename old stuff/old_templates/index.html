@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row my-4 text-center">
+        <h1 class="fw-normal display-4">Recipes</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <div class="container">
+                <div class="row justify-content-md-center">
+                    <div class="col-lg-3">
+                        <div>
+                            <h5>Filter</h5>
+                            <button class="btn btn-secondary col-md-9 dropdown-toggle" type="button" id="filter-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Filter
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="filter-dropdown">
+                                <li><a href="#" class="dropdown-item filter-item" id="filter-recents">Recents</a> </li>
+                                <li><a href="#" class="dropdown-item filter-item" id="filter-all">All</a> </li>
+                                <li><a href="#" class="dropdown-item filter-item" id="filter-favorite">Favorite</a> </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div>
+                            <h5>Category</h5>
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="" data-bs-toggle="dropdown" aria-expanded="false">
+                                Category
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="ms-5">
+                            <h5 class="">From Ingredients</h5>
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="" data-bs-toggle="dropdown" aria-expanded="false">
+                                From Ingredients
+                            </button>
+                        </div>
+
+                        <select class="form-select" id="category-filter"  required>
+                            {% for category in categories %}
+                                <option value="{{ category.name }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        let recipes_to_show = []; // This array will get populated with recipes from database, based on filter, category and "from ingredients"
+        
+        let filter_select = $("#filter-dropdown");
+        $(".filter-item").on("click", function() {
+            filter_select.html(this.text);
+        })
+    })
+</script>
+{% endblock %}

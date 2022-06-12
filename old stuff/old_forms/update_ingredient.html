@@ -1,0 +1,16 @@
+<form action="{{ url_for('views.update_ingredient') }}" method="POST">
+    <div class="form-group mb-2">
+        <input type="hidden" name="id" value="{{ ingredient.id }}">
+    </div>
+    <div class="form-group mb-2">
+        <label>Name:</label>
+        <input type="text" class="form-control" name="name" value="{{ ingredient.name }}" required="1">
+    </div>
+    <div class="form-group mb-2">
+        <label>Type:</label>
+        <input type="text" class="form-control" name="type" value="{{ ingredient.ingredient_type }}" required="1">
+    </div>
+    <div class="form-group mb-2">
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+</form>

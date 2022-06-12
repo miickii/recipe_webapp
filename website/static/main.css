@@ -1,0 +1,100 @@
+.inline{
+    display: inline-block;
+}
+
+.bg-red {
+    background-color:red;
+}
+
+.text-underline {
+    text-decoration: underline;
+}
+
+.make-recipe-border {
+    border-color: rgb(187, 187, 187) !important;
+}
+
+/* CHECKBOX */
+/*
+.form-check {
+    display: table;   Instead of display:block 
+    margin-left: auto;
+    margin-right: auto;
+}*/
+.checkbox-input[type=checkbox] {
+    border-radius: .25em;
+    height: 20px;
+    width: 20px;
+}
+.checkbox-label{
+    margin-left: 10px;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+/* IMAGE */
+.img-same-size {
+    width: 600px; /* You can set the dimensions to whatever you want */
+    height: 400px;
+    object-fit: cover; /* This crops the image so it doesn't get stretched or smushed */
+}
+
+.rounded-img{
+    border-radius: 10% !important; 
+}
+
+/* BUTTONS */
+.btn-xs {
+    padding: .25rem .4rem;
+    font-size: .875rem;
+    line-height: .5;
+    border-radius: .2rem;
+}
+/* overrite bootstrap default
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+    background-color: #8064A2 !important;
+}*/
+
+.btn-light-grey {
+    background-color: #C0C0C0;
+}
+.image_container {
+    position: relative;
+
+}
+.favorite-button {
+    position: absolute;
+    top: 4%;
+    left: 97%;
+    transform: translate(-100%, 0%);
+    -ms-transform: translate(-100%, 0%);
+    background-color: rgb(244, 244, 244);
+    color: white;
+    font-size: 16px;
+    border: none;
+    padding: 6px 11px;
+    cursor: pointer;
+    border-radius: 100%;
+    text-align: center;
+}
+
+.favorite-button:hover {
+    background-color: rgb(0, 212, 35) !important;
+}
+
+/* ICONS */
+.fa-heart {
+    color: black;
+}
+
+.favorite-button:hover .fa-heart {
+    color: white !important;
+}
+
+.ratings i {
+    color: green;
+}
+
+.make-recipe-icon {
+    color: rgb(242, 222, 0);
+}

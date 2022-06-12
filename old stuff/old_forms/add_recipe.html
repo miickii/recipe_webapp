@@ -1,0 +1,160 @@
+<form id="recipe-form" class="p-4 m-4 row shadow-sm rounded-3 border border-primary w-50" method="POST">
+    <div class="form-group col-md-12 my-2">
+        <label for="name">Name of Recipe</label>
+        <input type="text" required name="name" id="name" class="form-control">
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <label for="description">Description</label>
+        <textarea class="form-control" name="description" id="description" rows="2"></textarea>
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <label for="category">Category</label>
+        <select class="form-select" name="category" id="category" multiple required>
+            {% for category in categories %}
+                <option value="{{ category.name }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <div id="ingredients_div" class="row">
+            <div class="dropdown col-md-12">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="addIngredientButton" data-bs-toggle="dropdown" aria-expanded="false">
+                    Add Ingredient
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="addIngredientButton">
+                    {% for ingredient in ingredients %}
+                        <li><a class="dropdown-item ingredient-item" href="#" id="{{ ingredient.name }}">{{ ingredient.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <label for="num-of-servings"># Servings</label>
+        <select class="form-select" name="num-of-servings" id="num-of-servings">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+        </select>
+    </div>
+    <div class="form-group col-md-6 my-2">
+        <label for="prep-time">Prep Time</label>
+        <select class="form-select" name="prep-time" id="prep-time">
+            <option value="0">0 MINUTES</option>
+            <option value="5">5 MINUTES</option>
+            <option value="10">10 MINUTES</option>
+            <option value="15">15 MINUTES</option>
+            <option value="20">20 MINUTES</option>
+            <option value="25">25 MINUTES</option>
+            <option value="30">30 MINUTES</option>
+            <option value="35">35 MINUTES</option>
+            <option value="40">40 MINUTES</option>
+        </select>
+    </div>
+    <div class="form-group col-md-6 my-2">
+        <label for="cook-time">Cook Time</label>
+        <select class="form-select" name="cook-time" id="cook-time">
+            <option value="0">0 MINUTES</option>
+            <option value="5">5 MINUTES</option>
+            <option value="10">10 MINUTES</option>
+            <option value="15">15 MINUTES</option>
+            <option value="20">20 MINUTES</option>
+            <option value="25">25 MINUTES</option>
+            <option value="30">30 MINUTES</option>
+            <option value="35">35 MINUTES</option>
+            <option value="40">40 MINUTES</option>
+        </select>
+    </div>
+    <div class="form-group col-md-8 my-2">
+        <button class="btn btn-secondary" type="button" id="addStep">Add Recipe Step</button>
+        <br id="steps-below">
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <label for="notes">Notes</label>
+        <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+    </div>
+    <div class="form-group col-md-12 my-2">
+        <label for="theme-color" class="form-label">Theme Color</label>
+        <input type="color" class="form-control form-control-color" name="theme-color" id="theme-color" value="#563d7c" title="Choose Theme Color">
+    </div>
+    <div class="form-group">
+        <input type="hidden" name="hidden_ingredients" id="hidden_ingredients">
+    </div>
+    <div class="form-group">
+        <input type="hidden" name="hidden_categories" id="hidden_categories">
+    </div>
+    <div class="form-group mt-4">
+        <input type="submit" value="Add Recipe" class="btn btn-primary">
+    </div>
+</form>
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            let ingredient_items = $('.ingredient-item')
+            let ingredients = []
+            let ingredient_amts = []
+            let delete_buttons = $('.deleteIngredient')
+
+            let add_step_button = $('#addStep');
+            let step = 1;
+
+            $('#category').select2({
+                placeholder: 'Select Categories',
+                allowClear: true,
+            });
+            
+            $('#category').change(function() {
+                $('#hidden_categories').val($('#category').val());
+                /*items = $('#hidden_categories').val().split(",");
+                console.log(items)*/
+            });
+
+            $('#console').on("click", function() {
+                console.log(ingredients)
+            })
+
+            ingredient_items.on("click", function() {
+                parent_div = $("<div class='row'></div>")
+                $('#ingredients_div').append(parent_div);
+                div_input = $("<div class='col-md-6'></div>").attr('id', this.id + "-input")
+                div_delete = $("<div class='col-md-6 d-flex align-items-end'></div>").attr('id', this.id + "-delete")
+                parent_div.append(div_input)
+                parent_div.append(div_delete)
+                var label = $("<label class='mt-2'></label>").text(this.id).attr('for', this.id + "-amt");
+                var amt_input = $("<input type='text' required placeholder='amount (3 tbs, 200 ml)' class='form-control'>").attr('name', this.id + "-amt");
+                var del_item = $("<a href='#' class='btn btn-danger'>Remove</a>").attr('id', this.id + "-remove");
+                ingredients.push(this.id)
+                del_item.on("click", function() {
+                    var id = (this.id).split('-')[0];
+                    var index = ingredients.indexOf(id);
+                    ingredients.splice(index, 1);
+                    
+                    parent = $(this).parent().parent()
+                    parent.remove()
+                })
+                //var amt_input = $("<input type='text' class='inline' placeholder='amount'></input>").attr('name', this.id + "_amt")
+                $('#hidden_ingredients').val($('#hidden_ingredients').val() + "," + this.id);
+                console.log($('#hidden_ingredients').val());
+                div_input.append(label);
+                div_input.append(amt_input);
+                div_delete.append(del_item);
+                //$('#ingredients_div').after(label, amt_input);
+                //onclick='return confirm('Are You Sure To Delete?')'
+            });
+
+            add_step_button.on("click", function() {
+                curr_step = step.toString();
+                var label = $("<label class='mt-2'></label>").text("Step " + curr_step).attr("for", "step-" + curr_step);
+                var step_input = $("<textarea required placeholder='Instructions' class='form-control' rows='2'></textarea>").attr('name', "step-" + curr_step);
+                $('#steps-below').after(label, step_input);
+                step++;
+            })
+        })
+    </script>
+{% endblock %}

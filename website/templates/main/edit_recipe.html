@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% from 'main/_render_field.html' import render_field_recipe %}
+
+{% block content %}
+<div class="row mt-4 text-center">
+    <h1 class="fw-normal display-4">Add Recipe</h1>
+</div>
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        <form id="recipe-form" class="p-4 m-4 col-xl-5 col-lg-6 col-md-8 col-sm-9 shadow-sm rounded-3 border border-primary" method="POST">
+            <div class="row">
+                {{ form.csrf_token() }}
+                {{ render_field_recipe(form.name, 12, label_text="Name of Recipe") }}
+                {{ render_field_recipe(form.image, 12) }}
+                {{ render_field_recipe(form.description, 12, rows=2) }}
+                {{ render_field_recipe(form.categories, 12, multiple=true, label_text="Category", class="form-select", id="categories") }}
+                <div id="ingredients_div" class="row my-2">
+                    <div class="dropdown col-md-12">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="addIngredientButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Add Ingredient
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="addIngredientButton">
+                            {% for ingredient in ingredients %}
+                                <li><a class="dropdown-item ingredient-item" href="#" id="{{ ingredient.name }}">{{ ingredient.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {{ render_field_recipe(form.servings, 12, label_text="# Servings", class="form-select") }}
+                {{ render_field_recipe(form.prep_time, 6, class="form-select") }}
+                {{ render_field_recipe(form.cook_time, 6, class="form-select") }}
+                <div id="steps_div" class="row my-2">
+                    <div class="col-md-12">
+                        <button class="btn btn-secondary" type="button" id="addStep">Add Recipe Step</button>
+                    </div>
+                </div>
+                {{ render_field_recipe(form.notes, 12, rows=2) }}
+                {{ render_field_recipe(form.theme_color, 12, type="color", class="form-control form-control-color") }}
+                
+                {{ form.hidden_categories() }}
+                {{ form.hidden_ingredients() }}
+                {{ form.recipe_id(value=recipe.id) }}
+                {{ render_field_recipe(form.submit_add_recipe, 12, class="btn btn-primary mt-4", value="Update Recipe") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            let recipe = [{{ recipe_serialized|tojson }}][0]; // The reason it is in an array is just to avoid syntax errors
+            let ingredient_items = $('.ingredient-item')
+            let ingredients = []
+            let ingredient_amts = []
+            let delete_buttons = $('.deleteIngredient')
+
+            let add_step_button = $('#addStep');
+            let step_labels = [] // The labels
+            let steps = [] // The input elements
+            let steps_remove = [] // The remove button elements
+            let curr_step = 1;
+
+            $('#categories').select2({
+                placeholder: 'Select Categories',
+                allowClear: true,
+            });
+            
+            $('#categories').change(function() {
+                $('#hidden_categories').val($('#categories').val());
+                /*items = $('#hidden_categories').val().split(",");
+                console.log(items)*/
+            });
+
+            function add_ingredient(name) {
+                // Adding divs so the fields get positioned correctly
+                let parent_div = $("<div class='row'></div>");
+                $('#ingredients_div').append(parent_div);
+                let div_input = $("<div class='col-md-6'></div>").attr('id', name + "-input")
+                let div_delete = $("<div class='col-md-6 d-flex align-items-end'></div>").attr('id', name + "-delete")
+                parent_div.append(div_input)
+                parent_div.append(div_delete)
+
+                let label = $("<label class='mt-2'></label>").text(name).attr('for', name + "-amt");
+                let amt_input = $("<input type='text' required placeholder='amount (3 tbs, 200 ml)' class='form-control'>").attr('name', name + "-amt").attr('id', name + "-amt");
+                let del_item = $("<a href='#' class='btn btn-danger'>Remove</a>").attr('id', name + "-remove");
+
+                ingredients.push(name)
+                del_item.on("click", function() {
+                    var id = (this.id).split('-')[0];
+                    var index = ingredients.indexOf(id);
+                    ingredients.splice(index, 1);
+                    
+                    let parent = $(this).parent().parent();
+                    parent.remove();
+                    // Updating the value of hidden field when an ingredient gets removed
+                    $('#hidden_ingredients').val(ingredients);
+                })
+                div_input.append(label);
+                div_input.append(amt_input);
+                div_delete.append(del_item);
+                // Updating the value of the hidden field
+                $('#hidden_ingredients').val(ingredients);
+
+                return amt_input;
+            }
+
+            ingredient_items.on("click", function() {
+                add_ingredient(this.id);
+            });
+
+            function update_step_value() {
+                curr_step = 1; // Reset the step values
+                for(let i = 0; i < step_labels.length; i++){
+                    step_labels[i].text("Step " + curr_step.toString()).attr("for", "step-" + curr_step.toString());
+                    steps[i].attr('name', "step-" + curr_step.toString());
+                    steps_remove[i].attr('id', curr_step.toString() + "-step" + "-remove");
+                    curr_step++;
+                }
+            }
+
+            function add_step() {
+                // Creating the divs so the input get positioned correctly
+                let parent_div = $("<div class='row'></div>");
+                $('#steps_div').append(parent_div);
+                let div_input = $("<div class='col-md-9'></div>");
+                // align-items-end will position it on the bottom of the div (needs d-flex)
+                let div_delete = $("<div class='col-md-3 d-flex align-items-end'></div>");
+                parent_div.append(div_input);
+                parent_div.append(div_delete);
+
+                let step_str = curr_step.toString();
+                let label = $("<label class='mt-2'></label>").text("Step " + step_str).attr("for", "step-" + step_str);
+                let step_input = $("<textarea required placeholder='Instructions' class='form-control' rows='3'></textarea>").attr('name', "step-" + step_str).attr('id', "step-" + step_str);
+                // javascript:void(); is used instead of # to avoid the page from scrolling to the top
+                let del_item = $("<a href='#' class='btn btn-danger'>Remove</a>").attr('id', step_str + "-step" + "-remove");
+
+                // We are doing this so we can reset the step value when deleting a step
+                step_labels.push(label);
+                steps.push(step_input);
+                steps_remove.push(del_item);
+                del_item.click(function() {
+                    // First get the step number
+                    var id = (this.id).split('-')[0];
+                    // Then convert it to an int and subtract 1 because we want the index from the step_labels and steps array
+                    var index = (parseInt(id) - 1);
+                    // Finally remove the correct step_labels and steps and steps_remove element from their arrays using the index
+                    step_labels.splice(index, 1);
+                    steps.splice(index, 1);
+                    steps_remove.splice(index, 1);
+
+                    // .parent() 2 times since we also want to delete the input (both are inserted into a shared div)
+                    let parent = $(this).parent().parent();
+                    parent.remove();
+
+                    // Now we have to update all the step values, so it gets displayed correctly
+                    update_step_value()
+
+                    // The reason we return false is to avoid that the page scrolls to the top because of the href="#"
+                    return false;
+                })
+                div_input.append(label);
+                div_input.append(step_input);
+                div_delete.append(del_item)
+                curr_step++;
+            }
+
+            add_step_button.click(function() {
+                add_step();
+            });
+
+            // INITIALIZE ALL OF THE FIELDS TO THE CURRENT VALUES OF THE RECIPE
+            let recipe_categories = recipe.categories; 
+            for (let category of recipe_categories) {
+                let option = $('#categories option:contains(' + category.name + ')');
+                option.attr('selected', 'selected');
+            }
+            $('#categories').trigger('change'); // Notify any JS components that the value changed
+            $('#hidden_categories').val($('#categories').val()); // Update the values in the hidden field
+
+            // Initialize all the ingredients
+            let recipe_ingredients = recipe.ingredients;
+            let recipe_ingredients_amt = recipe.ingredients_amount;
+            // The ingredients_amount comes as a string that needs to be seperated by comma
+            recipe_ingredients_amt = recipe_ingredients_amt.split(',');
+            for (let i = 0; i < recipe_ingredients.length; i++) {
+                let name = recipe_ingredients[i].name;
+                //let ingredient_element = $('.ingredient-item:contains(' + name + ')'); // We want the first array item because for some reason its an array that also contains something called prevObject
+                let amt_input = add_ingredient(name);
+
+                // Set their amounts
+                // Since a recipe ingredients amount is at the same index as the recipe ingredient in our database model, we can just use the same i index to get it
+                amt_input.val(recipe_ingredients_amt[i]);
+            }
+
+            // Initialize steps
+            let recipe_steps = recipe.steps;
+            // The recipe.steps comes as a string that needs to be seperated by comma
+            recipe_steps = recipe_steps.split('@');
+            for (let step of recipe_steps) {
+                add_step();
+
+                // Set their amounts
+                let step_str = (curr_step-1).toString(); // We subtract one because we just added one to the variable when calling add_step()
+                let step_input_id = "#step-" + step_str;
+                
+                let step_input = $(step_input_id);
+                step_input.val(step);
+            }
+        });
+    </script>
+{% endblock %}

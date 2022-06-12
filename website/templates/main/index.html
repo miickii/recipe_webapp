@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row my-4 text-center">
+        <h1 class="fw-normal display-4">Recipes</h1>
+    </div>
+</div>
+<div class="container mt-1 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-sm-12">
+            <div class="row align-items-end">
+                <!--align-items-end aligns all the content to the bottom of the row-->
+                <div class="col-md-3 pe-0 col-sm-12">
+                    <span class="me-1">Sort by:</span>
+                    <button class="btn btn-outline-dark btn-sm filter dropdown-toggle me-3" type="button" id="filter-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        All
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="filter-dropdown">
+                        <li><a href="#" class="dropdown-item filter-item" id="filter-all">All</a> </li>
+                        <li><a href="#" class="dropdown-item filter-item" id="filter-recents">Recents</a> </li>
+                        <li><a href="#" class="dropdown-item filter-item" id="filter-favorite">Favorite</a> </li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <span class="me-1">Category:</span>
+                    <button class="btn btn-outline-dark btn-sm filter dropdown-toggle" type="button" id="category-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        All
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="category-dropdown">
+                        <li><a href="#" class="dropdown-item category-item" id="category-all">All</a> </li>
+                        {% for category in categories %}
+                            <li><a class="dropdown-item category-item" href="#" id="{{ category.name }}">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-4 col-sm-12">
+                    <h6 class="">From Ingredients</h6>
+                    <select class="form-select form-select-sm" id="ingredient-select" multiple>
+                        {% for ingredient in ingredients %}
+                            <option value="{{ ingredient.name }}">{{ ingredient.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-8 px-0 recipe-place">
+            <!--This is not needed as the javascript will create it automatically-->
+            <!--<div class="row recipe-place-row">
+                {% for recipe in recipes %}
+                <div class="col-md-4 mt-5">
+                    {% include 'main/_recipe.html' %}
+                </div>
+                {% endfor %}
+            </div>-->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        let sort_by = $("#filter-dropdown");
+        let category_items = $(".category-item");
+        let category_select = $("#category-dropdown");
+        let category = "";
+        let favorite = "false";
+        let ingredient_select = $('#ingredient-select');
+
+        function favorite_btn_change_color(element, change) {
+            if (change == "false") {
+                // Means that the recipe is no longer in favorites
+                element.css("background-color", "rgb(244, 244, 244)");
+
+                let heart = element.children('i');
+                heart.css("color", "black");
+
+            } else if (change == "true") {
+                // Recipe got added to favorites
+                element.css("background-color", "rgb(0, 212, 35)");
+
+                let heart = element.children('i');
+                heart.css("color", "white");
+            }
+        }
+
+        function toggle_favorite(element, recipe) {
+            $.post('/toggle_favorite', {
+                recipe: recipe
+            }).done(function(data) {
+                favorite_btn_change_color(element, data);
+            });
+        }
+
+        function add_recipe(data) {
+            let recipes = data;
+            for (let recipe of recipes) {
+                let url = "{{ url_for('views.recipe', name='NAMEOFRECIPE') }}".replace("NAMEOFRECIPE", recipe.name);
+
+                let img_container = $("<div class='image_container'></div>");
+                let img_thumbnail = $("<a href='' class='thumbnail'></a>").attr('href', url);
+                let img = $("<img class='card-img-top'>").attr('src', recipe.img);
+                let favorite_button = $("<button type='button' class='favorite-button'><i class='fas fa-solid fa-heart'></i></button>").attr('id', "favorite" + recipe.name);
+                if (recipe.favorite) {
+                    favorite_btn_change_color(favorite_button, "true");
+                } else {
+                    // If recipe is not favorite we want to change color when the favorite button is hovered over
+                    /*favorite_button.hover(function() {
+                        favorite_btn_change_color($(this))
+                    });*/
+                }
+                favorite_button.click(function() {
+                    toggle_favorite($(this), recipe.name);
+                });
+                img_thumbnail.append(img);
+                img_container.append(img_thumbnail);
+                img_container.append(favorite_button);
+
+                let div_card = $("<div class='card'></div>");
+                div_card.append(img_container);
+                let div_card_body = $("<div class='card-body'></div>");
+
+                // Html and functions for the name
+                title = $("<h5 class='card-title text-center'></h5>");
+                let link = $("<a href='' class='text-decoration-none text-dark'></a>").html(recipe.name).attr('href', url);
+                title.append(link);
+                title.hover( function() {
+                    // on enter
+                    $(this).addClass('text-underline');
+                }, function() {
+                    // on leave
+                    $(this).removeClass('text-underline');
+                });
+
+                description = $("<p class='card-text mt-2'></p>").html(recipe.description);
+                cook_time = $("<h6 class='text-center text-muted'></h6>").html("Cook Time: " + recipe.total_time);
+                div_bottom = $("<div class='d-flex justify-content-between install mt-3'></div>");
+                post_time = $("<div><i class='fa fa-calendar-o'></i><span class='ms-2'>1 days ago</span></div>");
+                //go_to = $("<a href='" + url + "' class='text-decoration-none'><span class='text-primary'>Go To Recipe&nbsp;<i class='fa fa-angle-right'></i></span></a>");
+                go_to = $("<a href='" + url + "' class='btn px-2 py-0 btn-secondary'><i class='fa fa-angle-right'></i></a>");
+                div_bottom.append(post_time);
+                div_bottom.append(go_to);
+
+                div_card_body.append(title);
+                for (let category of recipe.categories) {
+                    let badge = $("<span class='badge rounded-pill bg-red px-2 me-1'></span>");
+                    badge.css("background-color", category.color);
+                    let link = $("<a href='#' class='text-decoration-none text-light'></a>").html(category.name);
+                    badge.append(link);
+                    badge.click(function() {
+                        change_category(category.name, category.name);
+                    });
+                    div_card_body.append(badge);
+                }
+                div_card_body.append(description);
+                div_card_body.append(cook_time);
+                div_card_body.append(div_bottom);
+
+                div_card.append(div_card_body);
+                
+                parent_col = $("<div class='col-md-4 mt-5'></div>");
+                //parent_col.append(img_container);
+                parent_col.append(div_card);
+
+                $('.recipe-place-row').append(parent_col);
+            }
+        }
+        function retrieve_recipes(category="", ingredients="", favorite="false") {
+            // Removing all the recipes and adding them again
+            $(".recipe-place-row").remove();
+            recipe_row = $("<div class='row recipe-place-row'></div>");
+            $(".recipe-place").append(recipe_row);
+
+            $.post('/get_recipes', {
+                category: category,
+                ingredients: ingredients,
+                favorite: favorite
+            }).done(add_recipe);
+        }
+        // Calling it once at the start of the page
+        retrieve_recipes();
+
+        function change_category(id, text) {
+            category_select.html(text);
+            if (id == "category-all") {
+                category = "";
+            } else {
+                category = id;
+            }
+            retrieve_recipes(category=category, ingredients="", favorite=favorite);
+        }
+
+        // Change recipes displayed when changing category filter, and change text of dropdown
+        category_items.click(function() {
+            change_category(this.id, this.text);
+        });
+
+        // Change recipes displayed when changing ingredients included
+        ingredient_select.on("change", function() {
+            let ingredients = $(this).val();
+            retrieve_recipes(category="", ingredients=ingredients.toString());
+        });
+
+
+        let recipes_to_show = []; // This array will get populated with recipes from database, based on filter, category and "from ingredients"
+        let filter = "";
+
+        $(".filter-item").on("click", function() {
+            sort_by.html(this.text);
+            filter = this.text;
+            
+            if (this.text == "All") {
+                favorite = "false"
+            } else if (this.text == "Favorite") {
+                favorite = "true"
+            } else {
+                favorite = "false";
+            }
+            retrieve_recipes(category=category, ingredients="", favorite=favorite);
+        })
+
+        $('#ingredient-select').select2({
+            placeholder: 'Select Ingredients'
+        });
+    })
+</script>
+{% endblock %}
